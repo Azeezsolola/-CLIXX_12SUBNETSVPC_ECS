@@ -61,7 +61,7 @@ variable "instance_type"{
 # }
 
 variable "ami" {
-  default = "amzn2-ami-ecs-kernel-5.10-hvm-2.0.20240409-arm64-ebs"  # Replace with the full AMI ID for your region
+  default = "ami-0f02c760c74ca0cec"  # Replace with the full AMI ID for your region
 }
 
 variable "subnet" {
