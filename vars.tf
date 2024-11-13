@@ -48,7 +48,7 @@ variable "subnets" {
 }
 
 variable "instance_type"{
-  default ="c5.4xlarge"
+  default ="a1.4xlarge"
 }
 
 
