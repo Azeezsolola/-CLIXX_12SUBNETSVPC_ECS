@@ -756,11 +756,32 @@ resource "aws_launch_template" "my_launch_template" {
 
     user_data = base64encode(<<-EOF
               #!/bin/bash
-              echo "ECS_CLUSTER=${aws_ecs_cluster.ecs_cluster.name}" >> /etc/ecs/ecs.config
+              sudo yum update -y
+              sudo amazon-linux-extras install docker
+              sudo service docker start
+              sudo usermod -a -G docker ec2-user
+
+              sudo docker run --name ecs-agent \
+              --detach=true \
+              --restart=on-failure:10 \
+              --volume=/var/run/docker.sock:/var/run/docker.sock \
+              --volume=/var/log/ecs/:/log \
+              --volume=/var/lib/ecs/data:/data \
+              --net=host \
+              --env=ECS_CLUSTER=your-cluster-name \
+              --env=ECS_DATADIR=/data \
+              --env=ECS_ENABLE_TASK_IAM_ROLE=true \
+              --env=ECS_ENABLE_TASK_IAM_ROLE_NETWORK_HOST=true \
+              amazon/amazon-ecs-agent:latest
+
+              sudo mkdir -p /etc/ecs
+              echo "ECS_CLUSTER=${aws_ecs_cluster.ecs_cluster.name}" | sudo tee /etc/ecs/ecs.config
+
+
               systemctl enable --now ecs
               EOF
   )
-  
+
   tag_specifications {
     resource_type = "instance"
 
