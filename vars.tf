@@ -56,10 +56,13 @@ variable "instance_type"{
 #     default="vpc-0c6460b8c3c8fe62f"
 # }
 
-variable "ami" {
-  default = "ami-056d6c51d3b7d21af"
-}
+# variable "ami" {
+#   default = "ami-056d6c51d3b7d21af"
+# }
 
+variable "ami" {
+  default = "amzn2-ami-ecs-kernel-5.10-hvm-2.0.20240409-arm64-ebs"  # Replace with the full AMI ID for your region
+}
 
 variable "subnet" {
   type = list(string)
