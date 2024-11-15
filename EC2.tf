@@ -708,31 +708,37 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   family                   = "ecs-task-definition"
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
   task_role_arn            = aws_iam_role.ecs_task_role.arn
-  network_mode             = "bridge"  
-  requires_compatibilities = ["EC2"]  
-
- 
-  cpu       = "10240"  # 1024 CPU units = 1 vCPU 
-  memory    = "6144"  # 2048 MiB = 2 GB
+  network_mode             = "awsvpc"  
+  requires_compatibilities = ["FARGATE", "EC2"]  # "FARGATE" for serverless tasks, "EC2" for instance-backed
+  cpu                      = "10240"
+  memory                   = "6144"
 
   container_definitions = jsonencode([{
     name      = "Clixx-container"
-    image     = "495599767034.dkr.ecr.us-east-1.amazonaws.com/clixx-repository:clixxnewimage"  
-    cpu       = 10240  
-    memory    = 2048 
+    image     = "495599767034.dkr.ecr.us-east-1.amazonaws.com/clixx-repository:clixxnewimage"
+    cpu       = 10240
+    memory    = 2048
     essential = true
 
     portMappings = [{
       containerPort = 80
-      hostPort      = 80
       protocol      = "tcp"
     }]
+
+    healthCheck = {
+      command     = ["CMD-SHELL", "curl -f http://localhost/health || exit 1"]
+      interval    = 300
+      timeout     = 120
+      retries     = 3
+      startPeriod = 60
+    }
   }])
 
   tags = {
     Name = "MyECS-Task"
   }
 }
+
 
 
 
