@@ -48,7 +48,7 @@ variable "subnets" {
 }
 
 variable "instance_type"{
-  default ="c4.4xlarge"
+  default ="c5.4xlarge"
 }
 
 
@@ -57,7 +57,7 @@ variable "instance_type"{
 # }
 
 variable "ami" {
-  default = "ami-056d6c51d3b7d21af"
+  default = "ami-08237fa631bb7e81d"
 }
 
 
