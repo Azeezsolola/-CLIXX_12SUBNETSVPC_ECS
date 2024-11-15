@@ -709,7 +709,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
   task_role_arn            = aws_iam_role.ecs_task_role.arn
   network_mode             = "awsvpc"  
-  requires_compatibilities = ["FARGATE", "EC2"]  # "FARGATE" for serverless tasks, "EC2" for instance-backed
+  requires_compatibilities = ["EC2"]  # "FARGATE" for serverless tasks, "EC2" for instance-backed
   cpu                      = "10240"
   memory                   = "6144"
 
