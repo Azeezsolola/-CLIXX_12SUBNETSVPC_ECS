@@ -326,6 +326,17 @@ output "RDSEFSid" {
   value = aws_security_group.RDSEFS-sg.id
 }
 
+#------Adding rules to the rds datatbase SG-----------------------------------------------------------------
+
+resource "aws_security_group_rule" "msqlrds1" {
+  security_group_id        = aws_security_group.RDSEFS-sg.id
+  type                     = "ingress"
+  protocol                 = "tcp"
+  from_port                = 3306
+  to_port                  = 3306
+  source_security_group_id = aws_security_group.clixxapp-sg.id
+}
+
 #------------------------Adding Rules to Load Balancer Security Group -------------------------------------
 resource "aws_security_group_rule" "httpslb" {
   security_group_id = aws_security_group.loadBalancer-sg.id
