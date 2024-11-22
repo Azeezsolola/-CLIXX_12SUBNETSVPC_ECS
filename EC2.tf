@@ -872,10 +872,27 @@ resource "aws_launch_template" "my_launch_template" {
               sudo amazon-linux-extras install docker -y
               sudo service docker start
               sudo usermod -a -G docker ec2-user
+              sudo docker pull amazon/amazon-ecs-agent:latest
+
+             sudo docker run --platform linux/amd64 \
+              --name ecs-agent \
+              --detach=true \
+              --restart=on-failure:10 \
+              --volume=/var/run/docker.sock:/var/run/docker.sock \
+              --volume=/var/log/ecs:/log \
+              --volume=/var/lib/ecs/data:/data \
+              --net=host \
+              --env-file=/etc/ecs/ecs.config \
+              amazon/amazon-ecs-agent:latest
+
+
 
         
               sudo mkdir -p /etc/ecs
               echo "ECS_CLUSTER=${aws_ecs_cluster.ecs_cluster.name}" | sudo tee /etc/ecs/ecs.config
+
+              echo "ECS_ENABLE_TASK_IAM_ROLE=true" | sudo tee /etc/ecs/ecs.config
+              echo "ECS_ENABLE_TASK_IAM_ROLE_NETWORK_HOST=true" | sudo tee /etc/ecs/ecs.config
 
 
               systemctl enable --now ecs
