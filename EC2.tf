@@ -845,7 +845,7 @@ output "launch_template_id" {
 
 #-------------------------Creating Autosacling Group-----------------------------------------------
 resource "aws_autoscaling_group" "my_asg" {
-  depends_on = [ aws_db_instance.restored_db ]
+  #depends_on = [ aws_db_instance.restored_db ]
   launch_template {
     id      = aws_launch_template.my_launch_template.id
     version = "$Latest"  
