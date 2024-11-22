@@ -370,54 +370,6 @@ output "CLIXXSGid" {
 }
 
 #-----------------------------Adding ZRules to the Clixx Server security group------------------------------------
-resource "aws_security_group_rule" "sshbastion" {
-  security_group_id = aws_security_group.clixxapp-sg.id
-  type              = "ingress"
-  protocol          = "tcp"
-  from_port         = 22
-  to_port           = 22
-  cidr_blocks       = ["10.0.2.0/23"]
-
-
-}
-
-
-
-resource "aws_security_group_rule" "mysql" {
-  security_group_id        = aws_security_group.clixxapp-sg.id
-  type                     = "ingress"
-  protocol                 = "tcp"
-  from_port                = 3306
-  to_port                  = 3306
-  source_security_group_id = aws_security_group.loadBalancer-sg.id  
-}
-
-
-
-
-resource "aws_security_group_rule" "NFS1" {
-  security_group_id        = aws_security_group.clixxapp-sg.id
-  type                     = "ingress"
-  protocol                 = "tcp"
-  from_port                = 2049
-  to_port                  = 2049
-  source_security_group_id = aws_security_group.loadBalancer-sg.id  
-}
-
-
-
-
-resource "aws_security_group_rule" "NFS3" {
-  security_group_id        = aws_security_group.clixxapp-sg.id
-  type                     = "ingress"
-  protocol                 = "tcp"
-  from_port                = 2049
-  to_port                  = 2049
-  source_security_group_id = aws_security_group.RDSEFS-sg.id 
-}
-
-
-
 
 resource "aws_security_group_rule" "http1" {
   security_group_id        = aws_security_group.clixxapp-sg.id
@@ -427,56 +379,6 @@ resource "aws_security_group_rule" "http1" {
   to_port                  = 80
   source_security_group_id = aws_security_group.loadBalancer-sg.id
 }
-
-
-
-
-
-resource "aws_security_group_rule" "msqlrds1" {
-  security_group_id        = aws_security_group.RDSEFS-sg.id
-  type                     = "ingress"
-  protocol                 = "tcp"
-  from_port                = 3306
-  to_port                  = 3306
-  source_security_group_id = aws_security_group.clixxapp-sg.id
-}
-
-
-
-resource "aws_security_group_rule" "NFS22" {
-  security_group_id        = aws_security_group.RDSEFS-sg.id
-  type                     = "ingress"
-  protocol                 = "tcp"
-  from_port                = 2049
-  to_port                  = 2049
-  source_security_group_id = aws_security_group.clixxapp-sg.id
-}
-
-
-
-
-resource "aws_security_group_rule" "msql44" {
-  security_group_id        = aws_security_group.RDSEFS-sg.id
-  type                     = "ingress"
-  protocol                 = "tcp"
-  from_port                = 3306
-  to_port                  = 3306
-  source_security_group_id = aws_security_group.loadBalancer-sg.id
-}
-
-
-
-
-resource "aws_security_group_rule" "NFS445" {
-  security_group_id        = aws_security_group.RDSEFS-sg.id
-  type                     = "ingress"
-  protocol                 = "tcp"
-  from_port                = 2049
-  to_port                  = 2049
-  source_security_group_id = aws_security_group.loadBalancer-sg.id
-}
-
-
 
 
 
@@ -575,39 +477,39 @@ resource "aws_db_subnet_group" "groupdb" {
 }
 
 
-#------------------------Restoring RDS Database from snapshot------------------------------------------------------
+# #------------------------Restoring RDS Database from snapshot------------------------------------------------------
 
-resource "aws_db_instance" "restored_db" {
-  identifier          = "wordpressdbclixx-ecs"
-  snapshot_identifier = "arn:aws:rds:us-east-1:495599767034:snapshot:wordpressdbclixx-ecs"  
-  instance_class      = "db.m6gd.large"        
-  allocated_storage    = 20                     
-  engine             = "mysql"                
-  username           = "wordpressuser"
-  password           = "W3lcome123"         
-  db_subnet_group_name = aws_db_subnet_group.groupdb.name  
-  vpc_security_group_ids = [aws_security_group.RDSEFS-sg.id] 
-  skip_final_snapshot     = true
-  publicly_accessible  = true
+# resource "aws_db_instance" "restored_db" {
+#   identifier          = "wordpressdbclixx-ecs"
+#   snapshot_identifier = "arn:aws:rds:us-east-1:495599767034:snapshot:wordpressdbclixx-ecs"  
+#   instance_class      = "db.m6gd.large"        
+#   allocated_storage    = 20                     
+#   engine             = "mysql"                
+#   username           = "wordpressuser"
+#   password           = "W3lcome123"         
+#   db_subnet_group_name = aws_db_subnet_group.groupdb.name  
+#   vpc_security_group_ids = [aws_security_group.RDSEFS-sg.id] 
+#   skip_final_snapshot     = true
+#   publicly_accessible  = true
   
-  tags = {
-    Name = "wordpressdb"
-  }
-}
+#   tags = {
+#     Name = "wordpressdb"
+#   }
+# }
 
 
-#--------------------CAlling ssm to store RDS database ----------------------------------------------------------
+# #--------------------CAlling ssm to store RDS database ----------------------------------------------------------
 
-resource "aws_ssm_parameter" "dbidentifier" {
-  name        = "/myapp/config/dbidentifier"  
-  description = "DB Identifier"
-  type        = "String"    
-  value       = aws_db_instance.restored_db.identifier  
+# resource "aws_ssm_parameter" "dbidentifier" {
+#   name        = "/myapp/config/dbidentifier"  
+#   description = "DB Identifier"
+#   type        = "String"    
+#   value       = aws_db_instance.restored_db.identifier  
 
-  tags = {
-    Environment = "Dev" 
-  }
-}
+#   tags = {
+#     Environment = "Dev" 
+#   }
+# }
 
 #-----------------Getting the DB login details from ssm parammeter----------------------------------------------------
 data "aws_ssm_parameter" "name" {
@@ -860,14 +762,14 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   task_role_arn            = aws_iam_role.ecs_execution_role.arn
   network_mode             = "bridge"  
   requires_compatibilities = ["EC2"]  # "FARGATE" for serverless tasks, "EC2" for instance-backed
-  cpu                      = "10240"
-  memory                   = "6144"
+  cpu                      = "1024"
+  memory                   = "3072"
 
   container_definitions = jsonencode([{
     name      = "Clixx-container"
     image     = "495599767034.dkr.ecr.us-east-1.amazonaws.com/clixx-repository:clixxnewimage"
-    cpu       = 10240
-    memory    = 2048
+    cpu       = 512
+    memory    = 1536
     essential = true
 
     portMappings = [{
@@ -919,30 +821,10 @@ resource "aws_launch_template" "my_launch_template" {
               sudo amazon-linux-extras install docker -y
               sudo service docker start
               sudo usermod -a -G docker ec2-user
-              sudo docker pull amazon/amazon-ecs-agent:latest
-
-             sudo docker run --platform linux/amd64 \
-              --name ecs-agent \
-              --detach=true \
-              --restart=on-failure:10 \
-              --volume=/var/run/docker.sock:/var/run/docker.sock \
-              --volume=/var/log/ecs:/log \
-              --volume=/var/lib/ecs/data:/data \
-              --net=host \
-              --env-file=/etc/ecs/ecs.config \
-              amazon/amazon-ecs-agent:latest
-
-
-
-        
-              sudo mkdir -p /etc/ecs
+             
+              #sudo mkdir -p /etc/ecs
               echo "ECS_CLUSTER=ecs-cluster" | sudo tee /etc/ecs/ecs.config
-
-              # echo "ECS_ENABLE_TASK_IAM_ROLE=true" | sudo tee /etc/ecs/ecs.config
-              # echo "ECS_ENABLE_TASK_IAM_ROLE_NETWORK_HOST=true" | sudo tee /etc/ecs/ecs.config
-
-
-              systemctl enable --now ecs
+              
               EOF
   )
 
