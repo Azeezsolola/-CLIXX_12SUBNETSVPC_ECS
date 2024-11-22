@@ -813,7 +813,7 @@ resource "aws_iam_policy_attachment" "ecs_task_policy_attachment" {
 resource "aws_ecs_task_definition" "ecs_task_definition" {
   family                   = "ecs-task-definition"
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
-  task_role_arn            = aws_iam_role.ecs_task_role.arn
+  task_role_arn            = aws_iam_role.ecs_execution_role.arn
   network_mode             = "bridge"  
   requires_compatibilities = ["EC2"]  # "FARGATE" for serverless tasks, "EC2" for instance-backed
   cpu                      = "10240"
