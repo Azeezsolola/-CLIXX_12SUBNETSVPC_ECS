@@ -872,6 +872,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
 
     portMappings = [{
       containerPort = 80
+      hostPort      = 80
       protocol      = "tcp"
     }]
 
@@ -888,6 +889,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
     Name = "MyECS-Task"
   }
 }
+
 
 
 
