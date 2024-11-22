@@ -58,7 +58,7 @@ variable "instance_type"{
 
 variable "ami" {
   #default = "ami-0f65981e8ccb90000"
-  default = "ami-012e90e8b38918c4e"
+  default = "ami-096de1ffade3f0a8d"
 }
 
 
