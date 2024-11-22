@@ -575,25 +575,25 @@ resource "aws_db_subnet_group" "groupdb" {
 }
 
 
-#------------------------Restoring RDS Database from snapshot------------------------------------------------------
+# #------------------------Restoring RDS Database from snapshot------------------------------------------------------
 
-resource "aws_db_instance" "restored_db" {
-  identifier          = "wordpressdbclixx-ecs"
-  snapshot_identifier = "arn:aws:rds:us-east-1:495599767034:snapshot:wordpressdbclixx-ecs"  
-  instance_class      = "db.m6gd.large"        
-  allocated_storage    = 20                     
-  engine             = "mysql"                
-  username           = "wordpressuser"
-  password           = "W3lcome123"         
-  db_subnet_group_name = aws_db_subnet_group.groupdb.name  
-  vpc_security_group_ids = [aws_security_group.RDSEFS-sg.id] 
-  skip_final_snapshot     = true
-  publicly_accessible  = true
+# resource "aws_db_instance" "restored_db" {
+#   identifier          = "wordpressdbclixx-ecs"
+#   snapshot_identifier = "arn:aws:rds:us-east-1:495599767034:snapshot:wordpressdbclixx-ecs"  
+#   instance_class      = "db.m6gd.large"        
+#   allocated_storage    = 20                     
+#   engine             = "mysql"                
+#   username           = "wordpressuser"
+#   password           = "W3lcome123"         
+#   db_subnet_group_name = aws_db_subnet_group.groupdb.name  
+#   vpc_security_group_ids = [aws_security_group.RDSEFS-sg.id] 
+#   skip_final_snapshot     = true
+#   publicly_accessible  = true
   
-  tags = {
-    Name = "wordpressdb"
-  }
-}
+#   tags = {
+#     Name = "wordpressdb"
+#   }
+# }
 
 
 #--------------------CAlling ssm to store RDS database ----------------------------------------------------------
@@ -896,6 +896,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
 
 #----------------------Creating Launch Template --------------------------------------------------------------------------
 resource "aws_launch_template" "my_launch_template" {
+  
   name          = "my-launch-template"
   image_id      = var.ami
   instance_type = var.instance_type
@@ -935,10 +936,10 @@ resource "aws_launch_template" "my_launch_template" {
 
         
               sudo mkdir -p /etc/ecs
-              echo "ECS_CLUSTER=${aws_ecs_cluster.ecs_cluster.name}" | sudo tee /etc/ecs/ecs.config
+              echo "ECS_CLUSTER=ecs-cluster" | sudo tee /etc/ecs/ecs.config
 
-              echo "ECS_ENABLE_TASK_IAM_ROLE=true" | sudo tee /etc/ecs/ecs.config
-              echo "ECS_ENABLE_TASK_IAM_ROLE_NETWORK_HOST=true" | sudo tee /etc/ecs/ecs.config
+              # echo "ECS_ENABLE_TASK_IAM_ROLE=true" | sudo tee /etc/ecs/ecs.config
+              # echo "ECS_ENABLE_TASK_IAM_ROLE_NETWORK_HOST=true" | sudo tee /etc/ecs/ecs.config
 
 
               systemctl enable --now ecs
