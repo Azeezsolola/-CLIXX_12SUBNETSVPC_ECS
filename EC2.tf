@@ -575,25 +575,25 @@ resource "aws_db_subnet_group" "groupdb" {
 }
 
 
-# #------------------------Restoring RDS Database from snapshot------------------------------------------------------
+#------------------------Restoring RDS Database from snapshot------------------------------------------------------
 
-# resource "aws_db_instance" "restored_db" {
-#   identifier          = "wordpressdbclixx-ecs"
-#   snapshot_identifier = "arn:aws:rds:us-east-1:495599767034:snapshot:wordpressdbclixx-ecs"  
-#   instance_class      = "db.m6gd.large"        
-#   allocated_storage    = 20                     
-#   engine             = "mysql"                
-#   username           = "wordpressuser"
-#   password           = "W3lcome123"         
-#   db_subnet_group_name = aws_db_subnet_group.groupdb.name  
-#   vpc_security_group_ids = [aws_security_group.RDSEFS-sg.id] 
-#   skip_final_snapshot     = true
-#   publicly_accessible  = true
+resource "aws_db_instance" "restored_db" {
+  identifier          = "wordpressdbclixx-ecs"
+  snapshot_identifier = "arn:aws:rds:us-east-1:495599767034:snapshot:wordpressdbclixx-ecs"  
+  instance_class      = "db.m6gd.large"        
+  allocated_storage    = 20                     
+  engine             = "mysql"                
+  username           = "wordpressuser"
+  password           = "W3lcome123"         
+  db_subnet_group_name = aws_db_subnet_group.groupdb.name  
+  vpc_security_group_ids = [aws_security_group.RDSEFS-sg.id] 
+  skip_final_snapshot     = true
+  publicly_accessible  = true
   
-#   tags = {
-#     Name = "wordpressdb"
-#   }
-# }
+  tags = {
+    Name = "wordpressdb"
+  }
+}
 
 
 #--------------------CAlling ssm to store RDS database ----------------------------------------------------------
