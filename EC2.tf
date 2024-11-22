@@ -830,26 +830,25 @@ resource "aws_launch_template" "my_launch_template" {
               #!/bin/bash
               sudo yum update -y
               sudo amazon-linux-extras install docker -y
+              sudo yum install mysql -y
               sudo service docker start
               sudo usermod -a -G docker ec2-user
              
-              #sudo mkdir -p /etc/ecs
               echo "ECS_CLUSTER=ecs-cluster" | sudo tee /etc/ecs/ecs.config
-              lb_dns="https://terraform.clixx-azeez.com"
-              output_variable=$(mysql -u wordpressuser -p -h wordpressdbclixx-ecs.cn2yqqwoac4e.us-east-1.rds.amazonaws.com -D wordpressdb -pW3lcome123 -sse "select option_value from wp_options where option_value like 'CliXX-APP-%';")
-              echo $output_variable
 
-              if [ output_variable == ${lb_dns} ]
-              then
-                  echo "DNS Address in the the table"
+              lb_dns="https://terraform.clixx-azeez.com"
+              output_variable=$(mysql -u wordpressuser -h wordpressdbclixx-ecs.cn2yqqwoac4e.us-east-1.rds.amazonaws.com -D wordpressdb -pW3lcome123 -sse "select option_value from wp_options where option_value like 'CliXX-APP-%';")
+              echo "Output variable is: \$output_variable"
+
+              if [ "\$output_variable" == "\$lb_dns" ]; then
+                  echo "DNS Address is already in the table."
               else
-                  echo "DNS Address is not in the table"
-                  #Logging DB
-                  mysql -u wordpressuser -p -h wordpressdbclixx-ecs.cn2yqqwoac4e.us-east-1.rds.amazonaws.com -D wordpressdb -pW3lcome123<<SQL
-                  UPDATE wp_options SET option_value ="${lb_dns}" WHERE option_value LIKE "CliXX-APP-%";
-              SQL
+                  echo "DNS Address is not in the table. Updating..."
+                  mysql -u wordpressuser -h wordpressdbclixx-ecs.cn2yqqwoac4e.us-east-1.rds.amazonaws.com -D wordpressdb -pW3lcome123 <<SQL
+                  UPDATE wp_options SET option_value = "\$lb_dns" WHERE option_value LIKE "CliXX-APP-%";
+SQL
               fi
-      EOF
+EOF
   )
 
   tag_specifications {
