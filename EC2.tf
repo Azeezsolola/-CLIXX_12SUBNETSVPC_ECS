@@ -348,6 +348,14 @@ resource "aws_security_group_rule" "ssh" {
 }
 
 
+resource "aws_security_group_rule" "ecs_agent_ingress" {
+  security_group_id = aws_security_group.loadBalancer-sg.id
+  type              = "ingress"
+  protocol          = "tcp"
+  from_port         = 32768
+  to_port           = 65535
+  cidr_blocks       = ["10.0.0.0/16"] # Adjust to your VPC CIDR
+}
 
 
 #-----------------------------------Creating Security Group for CliXX Application server-----------------------
@@ -628,18 +636,116 @@ resource "aws_key_pair" "Stack_KP" {
 }
 
 
+# IAM Role for ECS EC2 Instances
+resource "aws_iam_role" "ecs_instance_role" {
+  name = "Clixx-ECS-Instance-Role"
 
-
-
-
-#------Pulling information about a role that was already created. This role isassumed by ec2 to perform an action-----------------------
-data "aws_iam_role" "ecs-role" {
-  name = "ecsInstanceRole"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
 }
 
-output "ecs-instancerole" {
-  value = data.aws_iam_role.ecs-role.id
+# Creating Policy for Role
+resource "aws_iam_policy" "ecs_role" {
+  name        = "Clixx-ECS-Instance-Policy"
+  description = "Policy to allow ECS Instance role to register with ECS, interact with ELB, and pull images from ECR"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = [
+          # EC2 permissions
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:Describe*",
+
+          # Elastic Load Balancing permissions
+          "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
+          "elasticloadbalancing:DeregisterTargets",
+          "elasticloadbalancing:Describe*",
+          "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
+          "elasticloadbalancing:RegisterTargets",
+
+          # ECS permissions
+          "ecs:Poll",
+          "ecs:DiscoverPollEndpoint",
+          "ecs:SubmitTaskStateChange",
+          "ecs:RegisterContainerInstance", 
+          "ecs:DiscoverPollEndpoint",      
+          "ecs:SubmitContainerStateChange", 
+          "ecs:StartTelemetrySession",      
+          "ecs:UpdateContainerInstancesState", 
+          "ecs:DescribeTasks",
+          "ecs:DescribeContainerInstances",
+          "ecs:DeregisterContainerInstance",
+          "ecs:StartTask",
+          "ecs:StopTask",
+          "ecs:ListClusters",
+          "ecs:ListTasks",
+
+          # Logging permissions
+          "logs:CreateLogStream",           
+          "logs:PutLogEvents",     
+          "logs:DescribeLogStreams", 
+          "logs:DescribeLogGroups"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = [
+          # S3 permissions for ECS
+          "s3:GetObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "arn:aws:s3:::aws-ecs-*",      
+          "arn:aws:s3:::aws-ecs-logs-*"
+        ]
+      },
+      {
+        Effect   = "Allow"
+        Action   = [
+          # ECR permissions for pulling images
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
 }
+
+
+# Attach the policy to ECS instance role
+resource "aws_iam_role_policy_attachment" "ecs_instance_policy_attachment" {
+  role       = aws_iam_role.ecs_instance_role.name
+  policy_arn = aws_iam_policy.ecs_role.arn
+}
+
+
+
+
+
+# #------Pulling information about a role that was already created. This role isassumed by ec2 to perform an action-----------------------
+# data "aws_iam_role" "ecs-role" {
+#   name = "ecsInstanceRole"
+# }
+
+# output "ecs-instancerole" {
+#   value = data.aws_iam_role.ecs-role.id
+# }
 
 #----------------------Creating ECS Cluster--------------------------------------------------------
 resource "aws_ecs_cluster" "ecs_cluster" {
@@ -650,7 +756,7 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 
 resource "aws_iam_instance_profile" "ecs_instance_profile" {
   name = "ecs-instance-profile"
-  role = data.aws_iam_role.ecs-role.name
+  role = aws_iam_role.ecs_instance_role.name
 }
 
 
