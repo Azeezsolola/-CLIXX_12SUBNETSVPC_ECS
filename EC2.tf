@@ -477,39 +477,39 @@ resource "aws_db_subnet_group" "groupdb" {
 }
 
 
-# #------------------------Restoring RDS Database from snapshot------------------------------------------------------
+#------------------------Restoring RDS Database from snapshot------------------------------------------------------
 
-# resource "aws_db_instance" "restored_db" {
-#   identifier          = "wordpressdbclixx-ecs"
-#   snapshot_identifier = "arn:aws:rds:us-east-1:495599767034:snapshot:wordpressdbclixx-ecs"  
-#   instance_class      = "db.m6gd.large"        
-#   allocated_storage    = 20                     
-#   engine             = "mysql"                
-#   username           = "wordpressuser"
-#   password           = "W3lcome123"         
-#   db_subnet_group_name = aws_db_subnet_group.groupdb.name  
-#   vpc_security_group_ids = [aws_security_group.RDSEFS-sg.id] 
-#   skip_final_snapshot     = true
-#   publicly_accessible  = true
+resource "aws_db_instance" "restored_db" {
+  identifier          = "wordpressdbclixx-ecs"
+  snapshot_identifier = "arn:aws:rds:us-east-1:495599767034:snapshot:wordpressdbclixx-ecs"  
+  instance_class      = "db.m6gd.large"        
+  allocated_storage    = 20                     
+  engine             = "mysql"                
+  username           = "wordpressuser"
+  password           = "W3lcome123"         
+  db_subnet_group_name = aws_db_subnet_group.groupdb.name  
+  vpc_security_group_ids = [aws_security_group.RDSEFS-sg.id] 
+  skip_final_snapshot     = true
+  publicly_accessible  = true
   
-#   tags = {
-#     Name = "wordpressdb"
-#   }
-# }
+  tags = {
+    Name = "wordpressdb"
+  }
+}
 
 
-# #--------------------CAlling ssm to store RDS database ----------------------------------------------------------
+#--------------------CAlling ssm to store RDS database ----------------------------------------------------------
 
-# resource "aws_ssm_parameter" "dbidentifier" {
-#   name        = "/myapp/config/dbidentifier"  
-#   description = "DB Identifier"
-#   type        = "String"    
-#   value       = aws_db_instance.restored_db.identifier  
+resource "aws_ssm_parameter" "dbidentifier" {
+  name        = "/myapp/config/dbidentifier"  
+  description = "DB Identifier"
+  type        = "String"    
+  value       = aws_db_instance.restored_db.identifier  
 
-#   tags = {
-#     Environment = "Dev" 
-#   }
-# }
+  tags = {
+    Environment = "Dev" 
+  }
+}
 
 #-----------------Getting the DB login details from ssm parammeter----------------------------------------------------
 data "aws_ssm_parameter" "name" {
@@ -845,7 +845,7 @@ output "launch_template_id" {
 
 #-------------------------Creating Autosacling Group-----------------------------------------------
 resource "aws_autoscaling_group" "my_asg" {
-  #depends_on = [ aws_db_instance.restored_db ]
+  depends_on = [ aws_db_instance.restored_db ]
   launch_template {
     id      = aws_launch_template.my_launch_template.id
     version = "$Latest"  
