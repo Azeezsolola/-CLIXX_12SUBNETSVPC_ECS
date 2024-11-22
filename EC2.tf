@@ -738,14 +738,14 @@ resource "aws_iam_role_policy_attachment" "ecs_instance_policy_attachment" {
 
 
 
-# #------Pulling information about a role that was already created. This role isassumed by ec2 to perform an action-----------------------
-# data "aws_iam_role" "ecs-role" {
-#   name = "ecsInstanceRole"
-# }
+#------Pulling information about a role that was already created. This role isassumed by ec2 to perform an action-----------------------
+data "aws_iam_role" "ecs-role" {
+  name = "ecsInstanceRole"
+}
 
-# output "ecs-instancerole" {
-#   value = data.aws_iam_role.ecs-role.id
-# }
+output "ecs-instancerole" {
+  value = data.aws_iam_role.ecs-role.id
+}
 
 #----------------------Creating ECS Cluster--------------------------------------------------------
 resource "aws_ecs_cluster" "ecs_cluster" {
