@@ -783,6 +783,50 @@ resource "aws_iam_policy_attachment" "ecs_execution_policy" {
 }
 
 
+# Creating Policy for Role
+resource "aws_iam_policy" "ecs_role2" {
+  name        = "Clixx-ecspoly"
+  description = "Policy to allow ECS Instance role to register with ECS, interact with ELB, and pull images from ECR"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "ecs:StartTelemetrySession",
+          "ecs:SubmitTaskStateChange",
+          "ecs:UpdateContainerInstancesState"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = [
+          "ec2:DescribeInstances",
+          "ec2:DescribeSecurityGroups",
+          "ec2:DescribeSubnets",
+          "ec2:DescribeVpcs"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+
+
+resource "aws_iam_policy_attachment" "ecs_execution_policy2" {
+  name       = "ecs-execution-policy"
+  policy_arn = aws_iam_policy.ecs_role2.arn
+  roles      = [aws_iam_role.ecs_execution_role.name]
+}
+
 #-------------------Creating Task role.Role that containers use to access AWS services.---------------------------------------------
 resource "aws_iam_role" "ecs_task_role" {
   name = "ecs-task-role"
