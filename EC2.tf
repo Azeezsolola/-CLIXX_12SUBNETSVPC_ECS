@@ -835,7 +835,7 @@ resource "aws_launch_template" "my_launch_template" {
               sudo usermod -a -G docker ec2-user
              
               echo "ECS_CLUSTER=ecs-cluster" | sudo tee /etc/ecs/ecs.config
-              sleep 300
+              sleep 120
 
               lb_dns="https://terraform.clixx-azeez.com"
               output_variable=$(mysql -u wordpressuser -h wordpressdbclixx-ecs.cn2yqqwoac4e.us-east-1.rds.amazonaws.com -D wordpressdb -pW3lcome123 -sse "select option_value from wp_options where option_value like 'CliXX-APP-%';")
